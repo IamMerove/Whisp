@@ -4,8 +4,24 @@ services:
     env: python
     region: frankfurt
     plan: free
+    
+    # Build configuration
     buildCommand: "pip install -r requirements.txt"
     startCommand: "cd src && uvicorn app:app --host 0.0.0.0 --port $PORT"
+    
+    # Health check (pour vérifier que l'app fonctionne)
+    healthCheckPath: /health
+    
+    # Environment variables
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11
+        value: "3.11"
+      - key: MODEL_NAME
+        value: openai/whisper-tiny
+        sync: false
+    
+    # Auto-deploy on push
+    autoDeploy: true
+    
+    # Notifications (optionnel)
+    # notifyOnFail: email

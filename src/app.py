@@ -23,7 +23,7 @@ app.add_middleware(
 )
 
 # Initialiser le transcriber
-transcriber = Transcriber(model_name="openai/whisper-small", device="cpu")
+transcriber = Transcriber(model_name="openai/whisper-tiny", device="cpu")
 
 # Dossier temporaire pour les uploads
 UPLOAD_DIR = Path("../data/uploads")
