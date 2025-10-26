@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ghost_whisperer/
+*.egg-info/
+
+# Data
+data/uploads/
+*.wav
+*.mp3
+*.m4a
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Models (si vous téléchargez des modèles)
+models/
+*.pt
+*.bin

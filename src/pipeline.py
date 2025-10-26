@@ -1,17 +1,9 @@
-# src/pipeline.py
-from src.transcription.transcriber import transcribe_audio
-from src.summarization.summarizer import summarize_text
-from src.config import AUDIO_PATH
-import os
+from transcription.transcriber import Transcriber
 
-def audio_to_summary(audio_filename: str):
-    audio_path = os.path.join(AUDIO_PATH, audio_filename)
-    transcript = transcribe_audio(audio_path)
-    summary = summarize_text(transcript)
+# Initialiser
+transcriber = Transcriber()
 
-    print("🗣️ Transcription (extrait):", transcript[:300], "...\n")
-    print("📝 Résumé:\n", summary)
-    return transcript, summary
-
-if __name__ == "__main__":
-    audio_to_summary("example.wav")
+# Transcrire un fichier
+audio_path = "../data/raw_audio/test_clean.wav"
+transcription = transcriber.transcribe(audio_path)
+print(f"Transcription: {transcription}")
