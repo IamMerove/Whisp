@@ -1,0 +1,155 @@
+# README.md - Audio Transcription API avec Whisper
+
+Une API FastAPI simple et efficace pour transcrire automatiquement des fichiers audio (MP3, WAV, M4A, FLAC, OGG) en texte grâce au modèle **OpenAI Whisper**.
+
+Déployable gratuitement sur **Render.com** (plan Free) en quelques minutes.
+
+## Fonctionnalités
+
+- Transcription automatique avec Whisper (`whisper-tiny` en prod gratuite, `whisper-small` en local)
+- Support de nombreux formats audio (via FFmpeg + librosa)
+- API REST avec endpoint `/transcribe`
+- CORS activé (prêt à être utilisé depuis une webapp React/Vue/etc.)
+- Nettoyage automatique des fichiers temporaires
+- Health check inclus
+- Auto-deploy sur Render via GitHub
+
+## Démo en ligne (si déjà déployée)
+
+> https://audio-transcription-api.onrender.com  
+> Docs interactives : https://audio-transcription-api.onrender.com/docs
+
+## Endpoints
+
+| Méthode | Endpoint         | Description                              |
+|--------|------------------|------------------------------------------|
+| GET    | `/`              | Message de bienvenue                     |
+| GET    | `/health`        | Vérifie que l'API est vivante            |
+| POST   | `/transcribe`    | Upload un fichier audio → retourne la transcription |
+| DELETE | `/cleanup`       | (Optionnel) Supprime tous les fichiers temporaires |
+
+### Exemple d'utilisation avec curl
+
+```bash
+curl -X POST "https://audio-transcription-api.onrender.com/transcribe" \
+     -F "file=@./mon_podcast.mp3" \
+     -H "Accept: application/json"
+```
+
+Réponse :
+```json
+{
+  "success": true,
+  "filename": "mon_podcast.mp3",
+  "transcription": "Bonjour à tous, bienvenue dans ce nouvel épisode où nous allons parler de..."
+}
+```
+
+## Structure du projet
+
+```
+.
+├── src/
+│   ├── app.py                  → Application FastAPI principale
+│   ├── config.py               → Configuration (modèles, chemins)
+│   ├── transcription/
+│   │   └── transcriber.py      → Classe Transcriber (Whisper)
+│   └── summarization/
+│       └── summarizer.py       → (Bonus) Résumé BART (non utilisé dans l'API pour l'instant)
+├── data/
+│   ├── raw_audio/              → Tes fichiers audio de test
+│   └── uploads/                → Fichiers uploadés temporairement
+├── render.yaml                 → Configuration de déploiement Render
+├── requirements.txt
+├── test_env.py                 → Script de test local (vérifie librosa/soxr/whisper)
+├── convert.py                  → Convertir MP3 → WAV 16kHz mono (utile en dev)
+├── force.py                    → Force la normalisation du WAV avant transcription
+└── README.md                   → Ce fichier
+```
+
+## Déploiement sur Render (gratuit)
+
+1. Crée un compte sur [render.com](https://render.com)
+2. Connecte ton repo GitHub
+3. Clique sur **New → Web Service**
+4. Sélectionne ce repo et cette branche
+5. Render détectera automatiquement le fichier `render.yaml`
+6. Paramètres automatiques :
+   - Region : Frankfurt
+   - Plan : Free
+   - Build Command : `pip install -r requirements.txt`
+   - Start Command : `cd src && uvicorn app:app --host 0.0.0.0 --port $PORT`
+
+L’API sera disponible en ~5-10 minutes (premier démarrage un peu lent à cause du téléchargement du modèle).
+
+## Utilisation en local
+
+```bash
+# 1. Cloner le repo
+git clone https://github.com/ton-pseudo/audio-transcription-api.git
+cd audio-transcription-api
+
+# 2. Créer un environnement virtuel
+python -m venv venv
+source venv/bin/activate    # Windows: venv\Scripts\activate
+
+# 3. Installer les dépendances
+pip install -r requirements.txt
+
+# 4. Lancer l'API
+cd src
+uvicorn app:app --reload
+```
+
+L’API sera disponible sur http://127.0.0.1:8000  
+Docs Swagger : http://127.0.0.1:8000/docs
+
+## Tester localement la transcription
+
+```bash
+python pipeline.py
+# ou
+python test_env.py
+```
+
+## Changer la taille du modèle Whisper
+
+Dans `render.yaml` ou localement :
+
+```yaml
+# Pour plus de précision (plus lent, plus de RAM → passe en plan payant sur Render)
+MODEL_NAME: openai/whisper-small
+# ou
+MODEL_NAME: openai/whisper-base
+# ou (recommandé gratuit)
+MODEL_NAME: openai/whisper-tiny   # actuel (rapide, ~500 Mo)
+```
+
+Puis redéploie.
+
+## Problèmes fréquents & solutions
+
+| Problème                            | Solution |
+|-------------------------------------|----------|
+| `FFmpeg not found`                  | Installe FFmpeg sur ta machine ou utilise le script `convert.py` |
+| Timeout sur Render                  | Modèle trop lourd → reste sur `whisper-tiny` en plan gratuit |
+| Transcription vide ou erronée       | Vérifie que ton WAV est en **16kHz mono 16-bit** → utilise `force.py` |
+| Erreur de mémoire                   | Passe sur un plan Render payant ou utilise `whisper-tiny` |
+
+## À venir (idées d'améliorations)
+
+- [ ] Ajouter le résumé automatique (BART)
+- [ ] Retourner les timestamps
+- [ ] Support des longs audios (>10min) avec chunking
+- [ ] Authentification API key
+- [ ] Stockage des transcriptions (SQLite ou base de données)
+
+## Auteur
+
+Projet réalisé dans le cadre d'une formation Simplon.co – Octobre 2025
+
+N’hésite pas à forker et améliorer ! ⭐
+
+---
+**Prêt en 5 minutes, gratuit, open-source**  
+Transcris tes podcasts, réunions, cours, interviews en un clin d’œil !
